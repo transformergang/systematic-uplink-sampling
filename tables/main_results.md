@@ -1,6 +1,6 @@
 # Main results on test data
 
-Every cell of the paper's main comparison. Sampling is replicated 2000 times on each fixed test population; a cell is the mean over the test deployments of a dataset (coverage, matched width, upload rate) with event recall pooled over events. *Coverage* is that of the nominal 95% interval; *matched width* is the half-width scaled by the smallest common factor that gives 95% coverage over the replications, relative to Uniform+PPI (an oracle diagnostic of actual error); *event recall* is the fraction of events with at least one upload; *upload rate / b* is the realised fraction of uploaded units divided by the budget. The union bound is the largest event recall any design with these marginals can reach. Trigger was run on the whale and vessel data only. *Nominal width* is the mean width of the interval as reported, relative to Uniform+PPI. The price parameter kappa of the closed-loop rule, selected on development data, is 0.95 (whale), 0.80 (vessel) and 0 (Gray's Reef).
+Every cell of the paper's main comparison. Sampling is replicated 2000 times on each fixed test population; a cell is the mean over the test deployments of a dataset (coverage, matched width, upload rate) with event recall pooled over events. *Coverage* is that of the nominal 95% interval; *matched width* is the half-width scaled by the smallest common factor that gives 95% coverage over the replications, relative to Uniform+PPI (an oracle diagnostic of actual error); *event recall* is the fraction of events with at least one upload; *upload rate / b* is the realised fraction of uploaded units divided by the budget. The union bound is the largest event recall any design with these marginals can reach. *Nominal width* is the mean width of the interval as reported, relative to Uniform+PPI. The price parameter kappa of the closed-loop rule, selected on development data, is 0.95 (whale), 0.80 (vessel) and 0 (Gray's Reef).
 
 ## Closed-loop rule
 
@@ -70,7 +70,7 @@ Designs: Uniform+PPI (probability b), Duty cycle, Independent (the same closed-l
 
 | Design | Coverage | Nominal width / Uniform+PPI | Matched width / Uniform+PPI | Event recall | Upload rate / b |
 |---|---:|---:|---:|---:|---:|
-| Trigger (top scores) | not run | -- | -- | -- | -- |
+| Trigger (top scores) | 0.000 | -- | -- | 0.375 | 1.343 |
 | Uniform+PPI | 0.942 | 1.000 | 1.000 | 0.079 | 1.000 |
 | Duty cycle | 0.937 | 0.928 | 0.875 | 0.083 | 1.000 |
 | Independent, same rule | 0.949 | 0.908 | 0.871 | 0.124 | 1.008 |
@@ -85,7 +85,7 @@ Designs: Uniform+PPI (probability b), Duty cycle, Independent (the same closed-l
 
 | Design | Coverage | Nominal width / Uniform+PPI | Matched width / Uniform+PPI | Event recall | Upload rate / b |
 |---|---:|---:|---:|---:|---:|
-| Trigger (top scores) | not run | -- | -- | -- | -- |
+| Trigger (top scores) | 0.000 | -- | -- | 0.538 | 1.241 |
 | Uniform+PPI | 0.955 | 1.000 | 1.000 | 0.152 | 1.000 |
 | Duty cycle | 0.975 | 0.923 | 0.735 | 0.163 | 1.000 |
 | Independent, same rule | 0.953 | 0.907 | 0.916 | 0.232 | 1.004 |
@@ -195,6 +195,8 @@ Relative bias of the mean of the uploaded labels (top-scoring segments) as an es
 | Whale calls | 0.10 | 0.000 | +132 % | 1.054 |
 | Vessel presence | 0.05 | 0.000 | +201 % | 1.133 |
 | Vessel presence | 0.10 | 0.000 | +165 % | 1.114 |
+| Gray's Reef | 0.05 | 0.000 | +504 % | 1.343 |
+| Gray's Reef | 0.10 | 0.000 | +312 % | 1.241 |
 
 ## Test deployments
 
