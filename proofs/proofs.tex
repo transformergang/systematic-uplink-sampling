@@ -1,0 +1,357 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{enumitem}
+\setlist[enumerate]{leftmargin=2em,itemsep=2pt}
+\setlist[itemize]{leftmargin=1.6em,itemsep=2pt}
+
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{supp}{Proposition S}
+\newtheorem{asym}{Proposition A}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+\newcommand{\E}{\mathbb{E}}
+\renewcommand{\Pr}{\mathbb{P}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\one}{\mathbf 1}
+\newcommand{\Hk}{\mathcal H}
+\newcommand{\Fk}{\mathcal F}
+\newcommand{\hth}{\hat\theta}
+\newcommand{\hV}{\hat V}
+
+\title{Proofs for ``Systematic Unequal-Probability Sampling for Valid Inference and Event Recall under an Uplink Budget on Passive Acoustic Nodes''}
+\author{The authors}
+\date{Companion material to the paper submitted to IEEE ISCAS 2027}
+
+\begin{document}
+\sloppy
+\maketitle
+
+\noindent This document contains the assumptions and complete proofs of Lemma~1, Propositions~1 and~2 and Corollary~1 of the paper, of the remarks that the paper makes without proof, and of two supplementary statements: the exact variance difference between the single start and EXCL (Proposition~S1) and the sufficiency of the uplink sketch (Proposition~S2). Section~\ref{sec:v2} defines the successive-difference variance estimate used in the supplementary tables. Notation follows the paper. The statements were also checked by exact enumeration and linear programming (directory \texttt{enumeration/} of the repository).
+
+\tableofcontents
+
+%======================================================================
+\section{Setting and notation}\label{sec:setting}
+\paragraph{Population and estimator.}
+A node observes units $t=1,\dots,N$ in time order. Scores $s_t$ (hence bins $j(t)$) and labels $y_t\in\{0,1\}$ are fixed numbers (design-based view); all randomness comes from the sampling. A rule assigns an upload probability $p_t\in[p_{\min},1]$ with $p_{\min}>0$. The decision is $\xi_t\in\{0,1\}$, $\Pr(\xi_t=1)$ is the inclusion probability, and the target is $\theta=N^{-1}\sum_t y_t$. For a predictor $f_t\in[0,1]$ put $r_t=y_t-f_t\in[-1,1]$ and
+\begin{equation}
+\hth=\frac1N\sum_t\Big[f_t+\xi_t\frac{r_t}{p_t}\Big],\qquad
+\hV=\frac1{N^2}\sum_t\xi_t\frac{r_t^2}{p_t^2}.\tag{1}
+\end{equation}
+The interval of the paper is $\hth\pm1.96\sqrt{\max(\hV,V_{\rm plug})}$. Since
+\begin{equation}
+\hth-\theta=\frac1N\sum_t r_t\Big(\frac{\xi_t}{p_t}-1\Big),\tag{2}
+\end{equation}
+the error of the estimator is the sum of the centred terms $r_t(\xi_t/p_t-1)$.
+
+\paragraph{EXCL (blocked restart).}
+Time is cut into blocks $B_1,B_2,\dots$ of consecutive units. Let $A_t$ be the cumulative probability within the block up to and including unit $t$ ($A=0$ before the first unit of the block). A unit $t$ opens a new block if $A_{t-1}+p_t>1$, if it starts a recording, or if the onset-alignment condition holds; hence every block has mass $\mu_k=\sum_{t\in B_k}p_t\le1$. Block $k$ draws one $u_k\sim U(0,1]$ and
+\[
+\xi_t=\one\{A_{t-1}<u_k\le A_t\}\qquad(t\in B_k).
+\]
+The $u_k$ are independent. Let $\Fk_k=\sigma(u_1,\dots,u_{k-1})$. The number $K\le N$ of blocks may be random; terms with $k>K$ are zero.
+
+\paragraph{Single start (Madow).}
+A \emph{recording} $\sigma$ is a maximal run of consecutive units without a recording start inside. With $C_t=\sum_{s\le t,\,s\in\sigma}p_s$ (the cumulative probability within the recording, $C=0$ before its first unit), $I_t=(C_{t-1},C_t]$ and $M_\sigma$ the value of $C$ at the last unit, the design draws one $u_\sigma\sim U(0,1]$ per recording, independently across recordings, and
+\[
+\xi_t=1\iff (u_\sigma+\mathbb Z)\cap I_t\neq\emptyset .
+\]
+Since $|I_t|=p_t\le1$, at most one point of $u_\sigma+\mathbb Z$ lies in $I_t$. A design is \emph{open loop} if all $p_t$ are functions of the scores alone (not of any draw), and \emph{closed loop} if $p_t$ also depends on earlier decisions.
+
+\paragraph{Events and recall.}
+An event $e$ is a fixed set of units; it is hit if $\sum_{t\in e}\xi_t\ge1$. Event recall is the mean of $\Pr(e\text{ hit})$ over events. The mass of $e$ in block $B_k$ is $M_k=\sum_{t\in e\cap B_k}p_t$.
+
+\paragraph{Ordered pairs.}
+Sums over $s\ne t$ run over ordered pairs.
+
+%======================================================================
+\section{Lemma 1: validity of EXCL}\label{sec:lemma}
+
+\begin{lemma}[Validity of EXCL; paper, Lemma~1]\label{lem:valid}
+Suppose that the first unit of block $k$, the extent of $B_k$ and, for $t\in B_k$, $p_t$ and $f_t$ are $\Fk_k$-measurable (they may use all scores but only draws of earlier blocks). Then
+\begin{enumerate}[label=(\roman*)]
+\item $\Pr(\xi_t=1\mid\Fk_k)=p_t$ for $t\in B_k$;
+\item $\E[\hth]=\theta$;
+\item $\E[\hV]-\Var(\hth)=N^{-2}\sum_k\E\big[(\sum_{t\in B_k}r_t)^2\big]\ge0$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(i) Given $\Fk_k$, the numbers $A_{t-1}<A_t\le1$ are fixed, with $A_t-A_{t-1}=p_t$ for $t\in B_k$ (the block mass is at most one by the rule that opens blocks, and the extent and $p_t$ are known). The variable $u_k\sim U(0,1]$ is independent of $\Fk_k$, so $\Pr(\xi_t=1\mid\Fk_k)=\Pr(A_{t-1}<u_k\le A_t\mid\Fk_k)=A_t-A_{t-1}=p_t$.
+
+(ii) Write $R_k=\sum_{t\in B_k}r_t$, $T_k=\sum_{t\in B_k}\xi_tr_t/p_t$ and $Z_k=T_k-R_k=\sum_{t\in B_k}r_t(\xi_t/p_t-1)$. By (2), $N(\hth-\theta)=\sum_{k\le K}Z_k$. Each block has at most $1/p_{\min}$ units (mass $\le1$, $p_t\ge p_{\min}$), at most one unit of a block is uploaded, and $|r_t|\le1$; hence $|T_k|\le1/p_{\min}$, $|R_k|\le1/p_{\min}$ and $|Z_k|\le 2/p_{\min}$. The variable $Z_k$ is $\Fk_{k+1}$-measurable, and by (i) and the $\Fk_k$-measurability of $r_t$ and $p_t$,
+\[
+\E[Z_k\mid\Fk_k]=\sum_{t\in B_k}r_t\Big(\frac{\Pr(\xi_t=1\mid\Fk_k)}{p_t}-1\Big)=0 .
+\]
+(The event $\{k\le K\}$ is $\Fk_k$-measurable.) Hence $(Z_k)$ is a bounded martingale-difference sequence and $\E[\hth]=\theta$.
+
+(iii) Because the $Z_k$ are bounded martingale differences, $\E[Z_jZ_k]=\E[Z_j\E[Z_k\mid\Fk_k]]=0$ for $j<k$, and since $\hth$ is unbiased,
+\[
+N^2\Var(\hth)=\sum_k\E[Z_k^2]=\sum_k\E\big[\E[T_k^2\mid\Fk_k]-R_k^2\big],
+\]
+where we used $\E[T_k\mid\Fk_k]=R_k$ (from the display above). The intervals $(A_{t-1},A_t]$, $t\in B_k$, are disjoint, so at most one $\xi_t$ in a block is non-zero and $T_k^2=\sum_{t\in B_k}\xi_tr_t^2/p_t^2$. Therefore $\E[T_k^2\mid\Fk_k]=\sum_{t\in B_k}r_t^2/p_t$ and
+\[
+N^2\E[\hV]=\E\sum_k\sum_{t\in B_k}\xi_t\frac{r_t^2}{p_t^2}=\E\sum_k\E[T_k^2\mid\Fk_k].
+\]
+Subtracting gives $N^2(\E\hV-\Var\hth)=\E\sum_kR_k^2\ge0$.
+\end{proof}
+
+\begin{remark}[Conditions used]
+The proof uses only: the probabilities and the predictor of a block are fixed by the scores and the draws of earlier blocks; the mass of a block is at most one; $u_k$ is uniform and independent of the past. In particular, the price and the token bucket of the closed-loop rule may change only when a block closes, and the periods of the prequential predictor must be aligned to block starts. The estimator $\hV$ in Lemma~1 is the raw one; replacing it by $\max(\hV,V_{\rm plug})$ can only widen the interval.
+\end{remark}
+
+\subsection*{Asymptotic conservativeness}
+The paper states that, with a growing number of blocks, the martingale central limit theorem makes the interval asymptotically conservative. We state the conditions used. Consider a sequence of populations and designs indexed by $N$ for which Lemma~1 applies, with $p_{\min}>0$ not depending on $N$, and write $s_N^2=N^2\Var(\hth)=\sum_k\E Z_k^2$ and $\mathcal V_N^2=\sum_k\E[Z_k^2\mid\Fk_k]$.
+
+\begin{enumerate}[label=(A\arabic*)]
+\item (non-degeneracy) $\liminf_N s_N^2/N>0$;
+\item (stability) $\mathcal V_N^2/s_N^2\to1$ in probability.
+\end{enumerate}
+
+\begin{asym}[Asymptotic conservativeness]\label{cor:clt}
+Under (A1)--(A2), $(\hth-\theta)/\sqrt{\Var\hth}\Rightarrow\mathcal N(0,1)$ and $\liminf_N\Pr\big(|\hth-\theta|\le z\sqrt{\hV}\big)\ge\Pr(|\mathcal N(0,1)|\le z)$ for every $z>0$; the same holds for the interval with $\max(\hV,V_{\rm plug})$.
+\end{asym}
+
+\begin{proof}
+Put $X_{N,k}=Z_k/s_N$. These are martingale differences with $|X_{N,k}|\le2/(p_{\min}s_N)\to0$ (by (A1), $s_N^2\to\infty$), so the Lindeberg condition holds; by (A2) the conditional variances sum to $\mathcal V_N^2/s_N^2\to1$. The martingale central limit theorem (e.g.\ \cite[Cor.~3.1]{hallheyde1980}) gives the first claim.
+
+For $\hV$: $N^2\hV=\sum_kT_k^2=\sum_k\E[T_k^2\mid\Fk_k]+D_N$ with $D_N=\sum_k(T_k^2-\E[T_k^2\mid\Fk_k])$. The summands of $D_N$ are martingale differences bounded by $p_{\min}^{-2}$, and there are at most $N$ of them, so $\E D_N^2\le Np_{\min}^{-4}$ and $D_N/s_N^2\to0$ in probability by (A1) and Chebyshev's inequality. Moreover $\E[T_k^2\mid\Fk_k]=\E[Z_k^2\mid\Fk_k]+R_k^2\ge\E[Z_k^2\mid\Fk_k]$, whence $N^2\hV\ge\mathcal V_N^2+D_N$ and, by (A2), $N^2\hV/s_N^2\ge1-o_p(1)$. Fix $\epsilon>0$; with probability tending to one $\hV\ge(1-\epsilon)\Var(\hth)$, so $\liminf\Pr(|\hth-\theta|\le z\sqrt{\hV})\ge\Pr(|\mathcal N(0,1)|\le z\sqrt{1-\epsilon})$ and $\epsilon\downarrow0$ gives the claim. Enlarging $\hV$ to $\max(\hV,V_{\rm plug})$ only enlarges the interval.
+\end{proof}
+
+\begin{remark}
+(A1) and (A2) are conditions on the sequence of populations; they are not implied by Lemma~1. The statement concerns the design-based asymptotics of a sequence of populations; the coverage in the tables of the paper is an empirical Monte-Carlo quantity.
+\end{remark}
+
+%======================================================================
+\section{Proposition 1: the restart cost is the price of conditional marginals}\label{sec:prop1}
+
+\paragraph{The class $\mathcal C$.}
+Units are decided in time order and every decision is final when it is made (\emph{immediate decisions}). Let $\mathcal F_s=\sigma(\xi_1,\dots,\xi_s)$ (together with any randomisation used up to $s$) and let $B_1,B_2,\dots$ be consecutive blocks with first units $\tau_k$. Put $\Hk_k=\mathcal F_{\tau_k-1}$ (the stopped $\sigma$-algebra: all decisions before the block) and, for a unit $t$, $\Hk(t)=\Hk_k$ on $\{t\in B_k\}$. A design is in $\mathcal C$ if
+
+\begin{enumerate}[label=(C\arabic*)]
+\item decisions are immediate, so $\Hk_k$ contains every decision made before $B_k$;
+\item the extent of $B_k$ and $p_t$, $t\in B_k$, are $\Hk_k$-measurable (functions of the fixed scores and of earlier decisions), and $p_t>0$; the design does not use the labels $y$;
+\item (validity) $\E[\hth_f]=\theta$ for every $y\in\{0,1\}^N$ and every predictor $f$ with values in $[0,1]$ whose $f_t$ is $\Hk(t)$-measurable.
+\end{enumerate}
+
+\noindent The predictors fitted on uploads of earlier blocks, such as the prequential predictor of the paper, are members of this class. EXCL belongs to $\mathcal C$ by Lemma~1(i)--(ii). For an event $e$ let $N_k=\sum_{t\in e\cap B_k}\xi_t$, $M_k=\sum_{t\in e\cap B_k}p_t$ and $D_k=\one\{\xi_s=0\ \forall s\in e,\ s<\tau_k\}$, which is $\Hk_k$-measurable by (C1)--(C2); $M_k$ is $\Hk_k$-measurable by (C2).
+
+\begin{proposition}[paper, Proposition~1]\label{prop:opt}
+Let a design satisfy (C1)--(C2).
+\begin{enumerate}[label=(\alph*)]
+\item (C3) holds if and only if $\Pr(\xi_t=1\mid\Hk(t))=p_t$ for all $t$.
+\item For every design in $\mathcal C$ and every event $e$,
+\[
+\E\sum_kM_k-\Pr(e\text{ hit})=\underbrace{\E\sum_k(1-D_k)M_k}_{\text{restart cost}}+\underbrace{W_e}_{\ge0},\qquad W_e=\E\sum_kD_k(N_k-1)^+ ,
+\]
+where $1-D_k=\one\{e\text{ hit before }B_k\}$ and $W_e$ counts repeated hits within blocks.
+\item If the masses $M_k=m_k$ are deterministic (the blocks may otherwise be random, and so may the units of $e$ in them), then every design in $\mathcal C$ satisfies $\Pr(e\text{ hit})\le U_e:=1-\prod_k(1-\min(1,m_k))$. For EXCL blocks $m_k\le1$, so $U_e=1-\prod_k(1-m_k)$.
+\item EXCL has $W_e=0$ for every event simultaneously. If it is open loop (blocks and $p_t$ determined by the scores), it attains $U_e=1-\prod_k(1-m_k)$ for every event at once. When all $m_k<1$, a design in $\mathcal C$ attains $U_e$ if and only if $W_e=0$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(a) ``$\Leftarrow$'': by (2), for $t\in B_k$ the factors $r_t$ and $p_t$ are $\Hk_k$-measurable, so $\E[r_t\xi_t/p_t]=\E[(r_t/p_t)\Pr(\xi_t=1\mid\Hk(t))]=\E[r_t]$, and (2) gives $\E\hth_f=\theta$ for every admissible $f$ (all variables are bounded because $p_t>0$ takes finitely many values).
+
+``$\Rightarrow$'': fix $t$ and $A\in\Hk(t)$. Take the population with $y_t=1$ and $y_s$ arbitrary for $s\ne t$ (say $0$), the predictor $f_s=y_s$ for $s\ne t$ (a constant, hence admissible) and $f_t=1-\one_A$, which is $\Hk(t)$-measurable with values in $\{0,1\}$. Then $r_s=0$ for $s\ne t$, $r_t=\one_A$ and (2) gives $0=\E[\hth_f-\theta]=N^{-1}\E[\one_A(\xi_t/p_t-1)]$. As $A\in\Hk(t)$ is arbitrary and $p_t$ is $\Hk(t)$-measurable and positive, $\Pr(\xi_t=1\mid\Hk(t))=p_t$. Only $\{0,1\}$-valued predictors were needed.
+
+(b) The first block in which $e$ is hit is unique, so $\one\{e\text{ hit}\}=\sum_kD_k\one\{N_k\ge1\}$, and $\one\{N\ge1\}=N-(N-1)^+$ for integer $N\ge0$. By (a), $\E[N_k\mid\Hk_k]=M_k$, and $D_k$ is $\Hk_k$-measurable, so $\E[D_kN_k]=\E[D_kM_k]$. Hence
+\[
+\Pr(e\text{ hit})=\E\sum_kD_kM_k-\E\sum_kD_k(N_k-1)^+ ,
+\]
+and $\E\sum_kM_k-\Pr(e\text{ hit})=\E\sum_k(1-D_k)M_k+W_e$. Both terms are expectations of non-negative variables. (All sums are finite since there are at most $N$ blocks.)
+
+(c) Index the blocks with $m_k>0$ by $k$ (blocks with $m_k=0$ do not meet $e$ and are skipped). Since $D_{k+1}=D_k\one\{N_k=0\}$ and $D_k$ is $\Hk_k$-measurable, Markov's inequality and (a), $\E[N_k\mid\Hk_k]=m_k$ give $\Pr(N_k\ge1\mid\Hk_k)\le\min(1,m_k)$ and
+\[
+\Pr(D_{k+1}=1)=\E\big[D_k\Pr(N_k=0\mid\Hk_k)\big]\ge(1-\min(1,m_k))\Pr(D_k=1).
+\]
+By induction $\Pr(e\text{ missed})\ge\prod_k(1-\min(1,m_k))$.
+
+(d) The intervals $(A_{t-1},A_t]$, $t\in B_k$, are disjoint and $u_k$ is a single draw, so $N_k\le1$ for every event: $W_e=0$ simultaneously for all $e$, and by (b) $\Pr(e\text{ hit})=\E\sum_kD_kM_k$ (closed loop included). If blocks and $p_t$ are deterministic, $N_k=\one\{u_k\in\bigcup_{t\in e\cap B_k}(A_{t-1},A_t]\}$ is a Bernoulli$(m_k)$ variable, independent across blocks, so $\Pr(e\text{ missed})=\prod_k(1-m_k)$ and (c) holds with equality.
+
+For the last claim let all $m_k<1$. If $W_e=0$ then $N_k\le1$ a.s.\ on $\{D_k=1\}$, so $\Pr(N_k\ge1\mid\Hk_k)=\E[N_k\mid\Hk_k]=m_k$ there and every step of (c) is an equality. Conversely, if $U_e$ is attained, then since $\Pr(D_{k+1}=1)\ge(1-m_k)\Pr(D_k=1)$ for every $k$ and the product of the factors is attained by $\Pr(\text{missed})$, each of these inequalities is an equality; hence $\E[D_k(\Pr(N_k=0\mid\Hk_k)-(1-m_k))]=0$ with a non-negative integrand, i.e.\ $\Pr(N_k\ge1\mid\Hk_k)=\E[N_k\mid\Hk_k]$ a.s.\ on $\{D_k=1\}$, which means $\E[(N_k-1)^+\mid\Hk_k]=0$ there and $W_e=0$.
+\end{proof}
+
+\begin{remark}[Corrections to a stronger formulation]
+(1) If some $m_k=1$, ``attains $U_e$ $\Rightarrow W_e=0$'' is false: take $B_1=\{a,b\}$ with $p_a=p_b=1/4$ and independent decisions, $B_2=\{c\}$ with $p_c=1$, $e=\{a,b,c\}$; then $m=(1/2,1)$, $U_e=1=\Pr(e\text{ hit})$ but $W_e=\Pr(\xi_a=\xi_b=1)=1/16$. (2) The bound (c) needs only that the \emph{masses} are deterministic, not the blocks.
+\end{remark}
+
+\subsection*{The union bound; single start and Deville's design}
+For any design with unconditional marginals $\Pr(\xi_t=1)=p_t$ and any event, Boole's inequality gives $\Pr(e\text{ hit})\le\min(1,\sum_{t\in e}p_t)$ (the \emph{union bound}). For $e$ split over two blocks with $m_1+m_2\le1$,
+\[
+\min(1,m_1+m_2)-U_e=m_1+m_2-(m_1+m_2-m_1m_2)=m_1m_2 ,
+\]
+the loss that every design in $\mathcal C$ pays. The following statements delimit the bound.
+
+\begin{enumerate}[label=(\alph*)]
+\item \emph{Single start.} Take $p_t$ deterministic and one start $u\sim U(0,1]$ over the cumulative probability axis. Then $\Pr(\xi_t=1)=p_t$, and a contiguous event is an interval of length $m_e=\sum_km_k$ on the circle $\mathbb R/\mathbb Z$; it is hit iff $u \bmod 1$ lies in this arc, with probability $\min(1,m_e)$, which equals the union bound and exceeds $U_e$ by $m_1m_2>0$ for an event split over two blocks. The design satisfies (C1)--(C2) but violates (C3): given the decisions of earlier blocks it can be deterministic. Example: blocks $\{a\},\{c\}$ with $p_a=p_c=1/2$ have $\Pr(\xi_c=1\mid\xi_a=1)=0\ne1/2$.
+\item \emph{Deville's design.} The systematic (ordered pivotal) design of Deville admits an implementation with immediate decisions \cite{panahbehagh2024}, so it satisfies (C1)--(C2). By Proposition~\ref{prop:opt}(c), \emph{any} design with (C1)--(C2) and deterministic masses whose hit probability exceeds $U_e$ must violate (C3), i.e.\ $\Pr(\xi_t=1\mid\Hk(t))\ne p_t$ for some $t$. In this sense a single start and Deville's design exceed the bound only by giving up the conditional marginals. (The statement does not claim that Deville's design exceeds the bound for every event, only that it can do so only in this way.)
+\item \emph{Delayed decisions.} If (C1) is weakened (decisions of a block are revealed only after the next block has started), the bound need not hold: in the extreme case that nothing is revealed before the end, $\Hk$ is trivial, admissible predictors are deterministic, and the single start above is valid and beats $U_e$.
+\end{enumerate}
+
+\begin{remark}[Closed loop: no uniform optimality]
+If the masses on $e$ in later blocks depend on earlier outcomes, EXCL is not uniformly optimal. Let $B_1=\{a,b\}$ with $a\in e$, $b\notin e$, $p_a+p_b\le1$, and $B_2=\{c\}$ with $c\in e$, $p_c=g(\xi_a+\xi_b)$, $g(0)>g(1)$. EXCL gives $\Pr(\xi_a=1)=p_a$, $\Pr(\xi_b=1)=p_b$ with at most one upload, so $\Pr(e\text{ hit})=p_a+p_bg(1)+(1-p_a-p_b)g(0)$. The design that draws $(\xi_a,\xi_b)$ with $\Pr(1,1)=x\in(0,\min(p_a,p_b)]$, $\Pr(1,0)=p_a-x$, $\Pr(0,1)=p_b-x$ (so that the marginals remain $p_a$, $p_b$, and (C3) holds since $\Hk_1$ is trivial) and $\xi_c\mid\text{past}\sim\mathrm{Bernoulli}(g(\xi_a+\xi_b))$ has $\Pr(e\text{ hit})$ larger by $x(g(0)-g(1))$, while its expected mass on $e$ differs by $x(g(0)-2g(1)+g(2))$, which can be negative (for example $p_a=0.3$, $p_b=0.4$, $g=(0.9,0.5,0)$, $x=0.25$: hit probability $+0.100$, expected mass $-0.025$). Hence recall comparisons ``at the same $p_t$'' are uniform only in open loop.
+\end{remark}
+
+%======================================================================
+\section{Corollary 1: the plug-in}\label{sec:cor1}
+
+\begin{corollary}[paper, Corollary~1]\label{cor:plugin}
+Let $p_t$ be open loop. Then EXCL draws at these probabilities keep $p_t$, the expected budget $\E\sum_t\xi_t=\sum_tp_t$ and Lemma~1; they hit every event with probability $1-\prod_k(1-m_k)\ge1-\prod_{t\in e}(1-p_t)$ (the value of independent draws); and for a fixed predictor they change $N^2\Var(\hth)$ by $-\sum_k\sum_{s\ne t\in B_k}r_sr_t$.
+\end{corollary}
+
+\begin{proof}
+Since $p_t$ is a function of the scores, the blocks are deterministic, the $u_k$ are independent and Lemma~1 applies. Marginals and budget: Lemma~1(i). Hit probability: Proposition~\ref{prop:opt}(d) gives $1-\prod_k(1-m_k)$, with $m_k=\sum_{t\in e\cap B_k}p_t$. For independent draws $\Pr(e\text{ missed})=\prod_k a_k$ with $a_k=\prod_{t\in e\cap B_k}(1-p_t)$, and the Weierstrass product inequality $\prod(1-p_t)\ge1-\sum p_t$ gives $a_k\ge1-m_k\ge0$; therefore $\prod_ka_k\ge\prod_k(1-m_k)$.
+
+Variance for a fixed predictor: the blocks are independent, $\E T_k=R_k$ and $\E T_k^2=\sum_{t\in B_k}r_t^2/p_t$, so $N^2\Var_{\rm EXCL}(\hth)=\sum_k\Var(T_k)=\sum_t r_t^2/p_t-\sum_kR_k^2$. For independent draws $N^2\Var_{\rm ind}(\hth)=\sum_tr_t^2(1-p_t)/p_t=\sum_tr_t^2/p_t-\sum_tr_t^2$. The difference is
+\[
+N^2(\Var_{\rm EXCL}-\Var_{\rm ind})=\sum_tr_t^2-\sum_kR_k^2=-\sum_k\sum_{s\ne t\in B_k}r_sr_t .
+\]
+\end{proof}
+
+\begin{remark}[Further facts from the same computation]
+(1) The variance of the budget is $\Var_{\rm EXCL}(\sum_t\xi_t)=\sum_k\mu_k(1-\mu_k)$, against $\Var_{\rm ind}(\sum_t\xi_t)=\sum_tp_t(1-p_t)$; the latter is larger by $\sum_k\sum_{s\ne t\in B_k}p_sp_t$ (block counts are Bernoulli$(\mu_k)$). (2) The expected raw variance estimate is never smaller under EXCL: $N^2(\E_{\rm EXCL}\hV-\E_{\rm ind}\hV_{\rm ind})=\sum_tr_t^2\ge0$ for a fixed predictor, where $\hV_{\rm ind}=N^{-2}\sum_t\xi_t(1-p_t)r_t^2/p_t^2$. (3) The change in the variance cannot be estimated without bias from the sample, since pairs in the same block are never uploaded together ($\pi_{st}=0$). (4) If $\sum_t r_t^2(1-p_t)/p_t>0$, the ratio of standard deviations is $\sqrt{1-C/S}$ with $C=\sum_k\sum_{s\ne t\in B_k}r_sr_t$ and $S=\sum_tr_t^2(1-p_t)/p_t$; whether $C\ge0$ on the target data is an assumption when only development data are labelled.
+\end{remark}
+
+%======================================================================
+\section{Proposition 2: open-loop single start}\label{sec:prop2}
+Let $p_t$ be open loop and let the design be the single start of Section~\ref{sec:setting}. On the cumulative-probability axis of a recording $\sigma$ put
+\[
+\tilde g_\sigma(x)=\frac{r_t}{p_t}\quad(x\in I_t),\qquad\tilde g_\sigma(x)=0\quad(x\notin(0,M_\sigma]),
+\]
+and let $\gamma_\sigma(h)=\int_{\mathbb R}\tilde g_\sigma(x)\tilde g_\sigma(x+h)\,dx$ be its covariogram ($\gamma_\sigma$ is even, continuous, piecewise linear, $\gamma_\sigma(h)=0$ for $|h|\ge M_\sigma$ and $\gamma_\sigma(0)=\sum_{t\in\sigma}r_t^2/p_t$).
+
+\begin{proposition}[paper, Proposition~2]\label{prop:madow}
+\begin{enumerate}[label=(\roman*)]
+\item $\Pr(\xi_t=1)=p_t$; $\Pr(\xi_s=\xi_t=1)=\lambda\big((I_s\bmod1)\cap(I_t\bmod1)\big)$ for $s,t$ in one recording, and units of different recordings are independent; any set of consecutive units of a recording with mass $m$ receives $\lfloor m\rfloor$ or $\lceil m\rceil$ uploads, in particular a recording receives $\lfloor M_\sigma\rfloor$ or $\lceil M_\sigma\rceil$; and $\hth$ is unbiased for any predictor with $f_t$ independent of $u_{\sigma(t)}$.
+\item For a fixed predictor,
+\[
+N^2(\E\hV-\Var\hth)=\sum_\sigma\Delta_\sigma,\qquad\Delta_\sigma=2\Big[\int_0^\infty\gamma_\sigma(h)\,dh-\sum_{j\ge1}\gamma_\sigma(j)\Big].
+\]
+Thus $\E\hV\ge\Var\hth$ iff $\sum_\sigma\Delta_\sigma\ge0$. A recording with $M_\sigma\le1$ has $\Delta_\sigma=(\sum_{t\in\sigma}r_t)^2\ge0$. If $\gamma_\sigma$ is nonincreasing and convex on $[1/2,M_\sigma]$ and $\int_0^{1/2}\gamma_\sigma\ge0$, then $\Delta_\sigma\ge0$. If $r$ is periodic with the sampling interval, $\Delta_\sigma$ can be negative without bound relative to $\E\hV$.
+\item With a closed-loop price the marginals are lost: if $p_1=0.5$ and $p_2=0.2$ when unit~1 was uploaded, $0.6$ otherwise, then $\Pr(\xi_2=1)=1/2$ and $\E[\xi_2/p_2]=0.5/0.6\approx0.83$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Fix a recording and drop $\sigma$.
+
+(i) The variable $u$ mod $1$ is uniform on $\mathbb R/\mathbb Z$. Because $|I_t|=p_t\le1$, $I_t$ maps injectively (up to an endpoint) onto an arc $I_t\bmod1$ of length $p_t$, and $(u+\mathbb Z)\cap I_t\ne\emptyset$ iff $u\bmod1\in I_t\bmod1$. Hence $\Pr(\xi_t=1)=p_t$ and $\Pr(\xi_s=\xi_t=1)=\lambda((I_s\bmod1)\cap(I_t\bmod1))$; different recordings use independent starts.
+
+For consecutive units $W$ of the recording, $\bigcup_{t\in W}I_t=(a,a+m_W]$ for some $a$ (the arcs tile the axis), and each upload in $W$ corresponds to exactly one point of $u+\mathbb Z$ in this interval, because at most one point lies in each $I_t$ and the $I_t$ are disjoint. A half-open interval of length $m$ contains $\lfloor m\rfloor$ or $\lceil m\rceil$ points of any translate of $\mathbb Z$. If $f_t$ is independent of $u$, then $\E[\xi_tr_t/p_t]=\E[r_t]$, and (2) gives $\E\hth=\theta$.
+
+(ii) We have $N(\hth-\theta)=\sum_\sigma(T_\sigma-\sum_{t\in\sigma}r_t)$ with $T_\sigma=\sum_{t\in\sigma}\xi_tr_t/p_t$, the recordings are independent, and $N^2\E\hV=\sum_tr_t^2/p_t=\sum_\sigma\gamma_\sigma(0)$ under every design with marginals $p_t$. So it suffices to compute $\Var T_\sigma$. Each selected unit receives exactly one point of $u+\mathbb Z$, hence $T_\sigma(u)=\sum_{m\in\mathbb Z}\tilde g(u+m)$ (points outside $(0,M]$ contribute zero). Because $\tilde g$ has compact support the sums are finite and
+\[
+\E T^2=\int_0^1\sum_{m,m'}\tilde g(u+m)\tilde g(u+m')\,du=\sum_{j\in\mathbb Z}\int_{\mathbb R}\tilde g(x)\tilde g(x+j)\,dx=\sum_{j\in\mathbb Z}\gamma(j),
+\]
+\[
+(\E T)^2=\Big(\int_{\mathbb R}\tilde g\Big)^2=\iint\tilde g(x)\tilde g(y)\,dx\,dy=\int_{\mathbb R}\gamma(h)\,dh .
+\]
+Hence $\Var T=\sum_{j\in\mathbb Z}\gamma(j)-\int_{\mathbb R}\gamma$ and, using evenness,
+\[
+\gamma(0)-\Var T=\int_{\mathbb R}\gamma-2\sum_{j\ge1}\gamma(j)=2\Big[\int_0^\infty\gamma-\sum_{j\ge1}\gamma(j)\Big]=:\Delta .
+\]
+If $M\le1$ then $\gamma(j)=0$ for $j\ge1$ and $\Delta=\int_{\mathbb R}\gamma=(\int\tilde g)^2=(\sum_tr_t)^2$.
+
+\emph{Sufficient condition.} Suppose $\gamma$ is nonincreasing and convex on $[1/2,M]$ (so $M>1/2$) and $\int_0^{1/2}\gamma\ge0$. Since $\gamma$ is continuous with $\gamma(M)=0$, the monotonicity gives $\gamma\ge0$ on $[1/2,M]$ and a left derivative at $M$ which is $\le0$, the right derivative being $0$; hence $\gamma$ (extended by $0$) is convex on $[1/2,\infty)$. For $j\ge1$ the interval $[j-\tfrac12,j+\tfrac12]\subset[1/2,\infty)$ and the Hermite--Hadamard inequality for convex functions gives $\gamma(j)\le\int_{j-1/2}^{j+1/2}\gamma$. Summing over $j\ge1$,
+\[
+\sum_{j\ge1}\gamma(j)\le\int_{1/2}^\infty\gamma=\int_0^\infty\gamma-\int_0^{1/2}\gamma\le\int_0^\infty\gamma ,
+\]
+so $\Delta\ge0$.
+
+\emph{Equal probabilities and the periodic counterexample.} Let $p_t\equiv1/k$ ($k\ge2$ an integer) on a recording of $n=Lk$ units, so $I_t=((t-1)/k,t/k]$ and $\tilde g=kr_t$ on $I_t$. A direct computation of the overlaps gives, for $h=i/k+s$ with $0\le s\le1/k$, $\gamma(h)=k^2[(1/k-s)c_i+sc_{i+1}]$ with $c_i=\sum_tr_tr_{t+i}$: $\gamma$ is the piecewise-linear interpolation of the values $kc_i$ at the lags $i/k$. In this case the condition above becomes a condition on the sequence of (expected) autocovariances (Cochran's condition for systematic sampling~\cite{cochran1946}), when $r$ is modelled as random and independent of the design. Now let $r_t=a_{t\bmod k}$ with $\sum_\phi a_\phi=0$ and $a\ne0$ (periodic with the sampling interval). The phase $\phi=\lceil ku\rceil$ is uniform on $\{1,\dots,k\}$ and the selected units are those with $t\equiv\phi\pmod k$, so $T=k\sum_{j=0}^{L-1}r_{\phi+jk}=kLa_\phi$ and $\sum_tr_t=L\sum_\phi a_\phi=0$. Therefore
+\[
+N^2\Var\hth=\Var T=\frac1k\sum_\phi k^2L^2a_\phi^2=kL^2\sum_\phi a_\phi^2,\qquad N^2\E\hV=\sum_t\frac{r_t^2}{p_t}=kL\sum_\phi a_\phi^2 ,
+\]
+so $\Var\hth/\E\hV=L\to\infty$ and $\Delta=kL(1-L)\sum_\phi a_\phi^2<0$ for $L\ge2$. EXCL with blocks equal to the consecutive $k$-tuples has $R_k=\sum_\phi a_\phi=0$ for every block, hence $\E\hV=\Var\hth$ exactly by Lemma~1(iii).
+
+(iii) Unit~1: $I_1=(0,1/2]$, so $\xi_1=\one\{u\le1/2\}$. If $u\le1/2$ then $\xi_1=1$, $p_2=0.2$, $I_2=(1/2,0.7]$ and neither $u$ nor $u+1\in(1,1.5]$ lies in $I_2$, so $\xi_2=0$. If $u>1/2$ then $\xi_1=0$, $p_2=0.6$, $I_2=(1/2,1.1]\ni u$ and $\xi_2=1$. Hence $\Pr(\xi_2=1)=1/2$ and $\E[\xi_2/p_2]=\tfrac12\cdot\tfrac1{0.6}=5/6$, whereas unbiasedness would require $1$. Under EXCL the price is frozen within a block and changes only at block starts, $\Pr(\xi_t=1\mid\text{draws of earlier blocks})=p_t$ by Lemma~1.
+\end{proof}
+
+\begin{remark}[Predictors fitted within a recording]
+Even in the open-loop case the single start does not have exact conditional marginals: $\Pr(\xi_t=1\mid\xi_s,\,s<t)\ne p_t$ in general. Hence unbiasedness can fail for predictors that use earlier uploads of the same recording (such as the prequential predictor within a recording): for one recording with $p=(1/2,1/2)$, $y=(1,1)$, $f_1=0$, $f_2=\xi_1y_1$, one finds $2\hth=3\xi_1+2(1-\xi_1)$ and $\E\hth=5/4\ne\theta=1$, whereas the independent draw gives $\E\hth=1$. Part~(i) therefore asks that $f_t$ be independent of the start of the recording.
+\end{remark}
+
+%======================================================================
+\section{Supplementary statements}\label{sec:supp}
+
+\subsection{Variance comparison between the single start and EXCL}
+\begin{supp}[exact variance difference]\label{supp:var}
+Let $p_t$ be open loop, the predictor fixed, and let EXCL use blocks within the recordings with the same $p_t$ (every recording start is a block start). Then within every block the joint law of $(\xi_t)_{t\in B_k}$ is the same under the single start and under EXCL, and
+\[
+N^2\big[\Var_{\rm Madow}(\hth)-\Var_{\rm EXCL}(\hth)\big]=\Gamma:=\sum_{\substack{s\ne t\ \text{in one recording}\\ \text{in different blocks}}}\frac{r_sr_t}{p_sp_t}\big(\pi^{\rm M}_{st}-p_sp_t\big),
+\]
+where $\pi^{\rm M}_{st}=\lambda((I_s\bmod1)\cap(I_t\bmod1))$ is the joint inclusion probability of the single start. Moreover $N^2(\E\hV-\Var_{\rm Madow}\hth)=\sum_kR_k^2-\Gamma$ with $R_k=\sum_{t\in B_k}r_t$.
+\end{supp}
+
+\begin{proof}
+A block $B_k$ is a set of consecutive units of one recording with $\bigcup_{t\in B_k}I_t=(a_k,a_k+\mu_k]$, $\mu_k\le1$. Under the single start, $u+\mathbb Z$ has at most one point in this interval, and the position $a_k+v$ of that point, $v=(u-a_k)\bmod 1$, is uniform on $(0,1]$, the point falling inside iff $v\le\mu_k$. Under EXCL the point $a_k+u_k$ lies in the block iff $u_k\le\mu_k$, and $u_k$ is uniform. In both designs there is at most one upload, and unit $t$ is uploaded iff the uniform variable falls in the sub-interval of length $p_t$ belonging to $t$: the joint law of $(\xi_t)_{t\in B_k}$ is the same, and $\Var_{\rm Madow}(T_k)=\Var_{\rm EXCL}(T_k)$ with $T_k=\sum_{t\in B_k}\xi_tr_t/p_t$.
+
+Now $N(\hth-\theta)=\sum_k(T_k-R_k)$. Under EXCL the blocks are independent, so $N^2\Var_{\rm EXCL}=\sum_k\Var(T_k)$. Under the single start, recordings are independent and
+\[
+N^2\Var_{\rm Madow}=\sum_k\Var(T_k)+\sum_{k\ne l\ \text{in one recording}}\mathrm{Cov}_{\rm M}(T_k,T_l),
+\]
+with $\mathrm{Cov}_{\rm M}(T_k,T_l)=\sum_{s\in B_k,t\in B_l}\frac{r_sr_t}{p_sp_t}(\pi^{\rm M}_{st}-p_sp_t)$ (the sum over ordered pairs $k\ne l$ counts each pair of blocks twice, matching the ordered pairs $s\ne t$ in $\Gamma$). Subtracting gives the first identity. For the second, $N^2\E\hV=\sum_tr_t^2/p_t$ (any design with marginals $p_t$), $N^2\Var_{\rm EXCL}=\sum_tr_t^2/p_t-\sum_kR_k^2$ (proof of Corollary~\ref{cor:plugin}), so $N^2(\E\hV-\Var_{\rm Madow})=\sum_kR_k^2-\Gamma$.
+\end{proof}
+
+\begin{remark}
+Consequently $\Gamma\le0$ implies $\Var_{\rm Madow}\le\Var_{\rm EXCL}\le\E\hV$; $0<\Gamma\le\sum_kR_k^2$ means that the single start is less precise than EXCL but its raw variance estimate is still conservative; and $\Gamma>\sum_kR_k^2$ means that it is anti-conservative. Combining with Proposition~\ref{prop:madow}(ii), $\Gamma=\sum_\sigma\big[2\sum_{j\ge1}\gamma_\sigma(j)-2\int_0^\infty\gamma_\sigma\big]+\sum_kR_k^2$. The check quantity used in the supplementary tables is $\kappa=N^2\Var_{\rm Madow}(\hth)/\sum_tr_t^2/p_t$: by Proposition~\ref{prop:madow}(ii), $N^2(\E\hV-\Var_{\rm Madow}\hth)=(1-\kappa)\sum_tr_t^2/p_t$, so $\kappa\le1$ iff the raw variance estimate is conservative in expectation. It is computed exactly from the scores, the probabilities and the predictor (script \texttt{enumeration/madow\_exact.py}); on development data it is a certificate only for the development data, and its transfer to test data is an assumption that the tables check empirically.
+\end{remark}
+
+\subsection{Sufficiency of the uplink sketch}
+\begin{supp}[sketch sufficiency]\label{supp:sketch}
+Let time be cut into periods $k=1,2,\dots$ and let each unit $t$ have a bin $j(t)$ and a probability level $\ell(t)$, meaning that its upload probability is $p_t=p_{\ell(t)}$ (the quantised value carried by the node). The node sends (a) the counts $C[k,j,\ell]$ of all units in period $k$ with bin $j$ and level $\ell$, and (b) for every uploaded unit its time stamp (hence period $k_t$), bin, level and label $y_t$. Let the shore predictor depend on a unit only through its (bin, period), $f_t=g_{k(t)}(j(t))$, with $g_k$ a function of the uploads and counts of periods $<k$, and let $V_{\rm plug}=N^{-2}\sum_t\tilde v_t/p_t$ with $\tilde v_t=\tilde v_{k(t),j(t)}$ a function of $g_{k(t)}(j(t))$ and development statistics. Then $\hth$, $\hV$ and $V_{\rm plug}$ are determined exactly by (a) and (b), for every such predictor.
+\end{supp}
+
+\begin{proof}
+The functions $g_k$ are computed from the data of periods $<k$, which are contained in (a) and (b); thus all $g_k(j)$ are determined, including for the periods in which units were not uploaded. Then
+\[
+\sum_tf_t=\sum_{k,j}g_k(j)\sum_\ell C[k,j,\ell],\qquad N=\sum_{k,j,\ell}C[k,j,\ell],
+\]
+\[
+\sum_t\xi_t\frac{r_t}{p_t}=\sum_{t\ \text{uploaded}}\frac{y_t-g_{k_t}(j_t)}{p_{\ell_t}},\qquad
+N^2\hV=\sum_{t\ \text{uploaded}}\frac{(y_t-g_{k_t}(j_t))^2}{p_{\ell_t}^2},
+\]
+and $N^2V_{\rm plug}=\sum_{k,j,\ell}C[k,j,\ell]\,\tilde v_{k,j}/p_\ell$. All right-hand sides use only (a) and (b). Hence the shore can replace the predictor without any downlink.
+\end{proof}
+
+\begin{remark}
+The statement is exact arithmetic. It does not need the draws $u$. The prequential predictor of the paper (intercept $a_k$ of period $k$ fitted to the weighted uploads $1/p$ of earlier periods) is a member of the class. The statement requires that the upload records carry the period (time stamp) and the level, and that $g_k$ does not use scores or labels of non-uploaded units of earlier periods.
+\end{remark}
+
+%======================================================================
+\section{Successive-difference variance estimate}\label{sec:v2}
+Let $T_k=\sum_{t\in B_k}\xi_tr_t/p_t$ be the block total. The estimate of the paper is $V_1=\hV=N^{-2}\sum_kT_k^2$ (because at most one unit is uploaded per block, $\sum_kT_k^2=\sum_t\xi_tr_t^2/p_t^2$). The successive-difference estimate uses consecutive blocks \emph{within a recording}. For a recording with blocks $k_1<\dots<k_m$ define
+\[
+w_{k_i}=\begin{cases}(T_{k_i}-T_{k_{i+1}})^2,&i<m\quad(m\ge2),\\ (T_{k_{m-1}}-T_{k_m})^2,&i=m\quad(m\ge2;\ \text{the last difference is repeated}),\\ 2T_{k_1}^2,&m=1,\end{cases}
+\qquad
+V_2=\frac1{N^2}\cdot\frac12\sum_kw_k .
+\]
+Thus a recording with $m\ge2$ blocks contributes $\tfrac12\big[\sum_{i<m}(T_{k_i}-T_{k_{i+1}})^2+(T_{k_{m-1}}-T_{k_m})^2\big]$ to $N^2V_2$ ($m$ squared differences, the last one counted twice), and a recording with a single block contributes $T_{k_1}^2$, its contribution to $N^2V_1$. The intervals use $\max(V_2,V_{\rm plug})$ in place of $\max(V_1,V_{\rm plug})$. This is the successive-difference estimator of systematic and one-per-stratum sampling \cite{wolter2007}, applied to the block totals.
+
+\begin{remark}[Expectation in the open-loop case]\label{rem:v2}
+Let $p_t$ be open loop and the predictor fixed, so that the blocks are deterministic and the $T_k$ are independent with $\E T_k=R_k$; write $v_k=\Var T_k$ and $\delta_i=R_{k_i}-R_{k_{i+1}}$. For consecutive blocks, $\E(T_{k_i}-T_{k_{i+1}})^2=v_{k_i}+v_{k_{i+1}}+\delta_i^2$. For a recording with $m\ge2$ blocks the contribution to $N^2\E V_2$ is therefore
+\[
+\frac12\Big[\sum_{i<m}(v_{k_i}+v_{k_{i+1}}+\delta_i^2)+v_{k_{m-1}}+v_{k_m}+\delta_{m-1}^2\Big]
+=\sum_{i=1}^mv_{k_i}+\frac12\big(v_{k_{m-1}}-v_{k_1}\big)+\frac12\Big[\sum_{i<m}\delta_i^2+\delta_{m-1}^2\Big],
+\]
+and for a single-block recording it is $v_{k_1}+R_{k_1}^2$. With $N^2\Var\hth=\sum_kv_k$,
+\[
+N^2(\E V_2-\Var\hth)=\sum_{\text{rec.},\,m\ge2}\frac12\Big[v_{k_{m-1}}-v_{k_1}+\sum_{i<m}\delta_i^2+\delta_{m-1}^2\Big]+\sum_{\text{rec.},\,m=1}R_{k_1}^2 .
+\]
+Compared with $N^2(\E V_1-\Var\hth)=\sum_kR_k^2$, the squared block totals are replaced by squared differences of consecutive block totals, which are small when the residual totals vary slowly. The edge term $\tfrac12(v_{k_{m-1}}-v_{k_1})$ has no fixed sign (it vanishes for $m=2$), so $V_2$ is not conservative in expectation for every population; it is one block variance per recording against the sum over all its blocks. In closed loop the blocks are not independent and no identity is claimed. The tables report the empirical ratios $\E V_2/\Var\hth$ and the coverage.
+\end{remark}
+
+
+\begin{thebibliography}{9}
+\bibitem{hallheyde1980} P. Hall and C. C. Heyde, \emph{Martingale Limit Theory and Its Application}, Academic Press, 1980.
+\bibitem{cochran1946} W. G. Cochran, Relative accuracy of systematic and stratified random samples for a certain class of populations, \emph{Ann. Math. Statist.} 17(2):164--177, 1946.
+\bibitem{wolter2007} K. M. Wolter, \emph{Introduction to Variance Estimation}, 2nd ed., Springer, 2007.
+\bibitem{panahbehagh2024} B. Panahbehagh, R. Jauslin and Y. Till\'e, A general stream sampling design, \emph{Comput. Statist.} 39(6):2899--2924, 2024.
+\end{thebibliography}
+
+\end{document}
