@@ -2,7 +2,7 @@
 
 Companion material for the paper
 
-> *Systematic Unequal-Probability Sampling for Active Statistical Inference and Event Recall under an Uplink Budget on Passive Acoustic Nodes*
+> *Systematic Sampling for Active Statistical Inference and Event Recall on Acoustic Nodes*
 > (submitted to IEEE ISCAS 2027).
 
 The paper has four pages. This repository holds what does not fit there: the proofs, the exact-enumeration checks, the full result tables, a reference implementation of the draws and the estimator, and the integer C code that ran on the microcontroller boards.
